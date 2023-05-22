@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">lostfoundinkotlin</string>
+    <string name="go_back_to_main_screen">Go Back to Main Screen</string>
+    <string name="lost">Lost</string>
+    <string name="found">Found</string>
+    <string name="name">Name</string>
+    <string name="contact_information">Contact Information</string>
+    <string name="description">Description</string>
+    <string name="date">Date</string>
+    <string name="location">Location</string>
+    <string name="save">Save</string>
+    <string name="go_back_to_main_screen2">Go Back to Main Screen</string>
+    <string name="create_a_new_advert">Create a new advert</string>
+    <string name="show_all_lost_and_found_items">Show all lost and found items</string>
+    <string name="a_simple_lost_and_found_app">A Simple Lost and Found App</string>
+    <string name="made_with_kotlin">Made with Kotlin</string>
+    <string name="remove">Remove</string>
+</resources>

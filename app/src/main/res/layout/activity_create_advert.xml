@@ -55,6 +55,23 @@
         android:layout_height="wrap_content"
         android:hint="@string/location" />
 
+    <AutoCompleteTextView
+        android:id="@+id/locationAutocomplete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:completionThreshold="1"
+        android:hint="@string/start_typing_location"
+        android:inputType="text"
+        android:maxLines="1" />
+
+    <Button
+        android:id="@+id/getCurrentLocationButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/get_current_location" />
+
     <Button
         android:id="@+id/saveButton"
         android:layout_width="match_parent"

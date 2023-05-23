@@ -2,7 +2,7 @@ package com.mrdino.lostfoundinkotlin
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.location.Location
+import android.location.Geocoder
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -19,10 +19,10 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
-import com.google.android.libraries.places.api.model.Place.Field.ADDRESS
-import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
+import java.io.IOException
+import java.util.Locale
 
 class CreateAdvertActivity : AppCompatActivity() {
 
@@ -40,6 +40,9 @@ class CreateAdvertActivity : AppCompatActivity() {
     private lateinit var getCurrentLocationButton: Button
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private var latitude: Double = 0.0
+    private var longitude: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,7 +81,10 @@ class CreateAdvertActivity : AppCompatActivity() {
         // Set AutoComplete Query listener
         locationAutocomplete.setOnItemClickListener { _, _, position, _ ->
             val selectedPlace = adapter.getItem(position)
-            // Handle selected place
+            locationAutocomplete.setText(selectedPlace)
+            if (selectedPlace != null) {
+                updateLocationCoordinates(selectedPlace)
+            }
         }
 
         locationAutocomplete.addTextChangedListener(object : TextWatcher {
@@ -138,7 +144,7 @@ class CreateAdvertActivity : AppCompatActivity() {
         val date = dateEditText.text.toString()
         val location = locationEditText.text.toString()
 
-        val item = Item(0, advertType, name, contact, description, date, location)
+        val item = Item(0, advertType, name, contact, description, date, location, latitude, longitude)
         val dbHelper = DatabaseHelper(this)
         dbHelper.insertItem(item)
 
@@ -149,16 +155,21 @@ class CreateAdvertActivity : AppCompatActivity() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // Request location permissions if not granted
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
             return
         }
 
         // Retrieve the user's current location
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             location?.let {
                 val currentLatLng = LatLng(location.latitude, location.longitude)
                 val address = getAddressFromLocation(currentLatLng)
                 locationAutocomplete.setText(address)
+                updateLocationCoordinates(address)
             } ?: run {
                 Toast.makeText(this, "Failed to retrieve location", Toast.LENGTH_SHORT).show()
             }
@@ -166,26 +177,47 @@ class CreateAdvertActivity : AppCompatActivity() {
     }
 
     private fun getAddressFromLocation(latLng: LatLng): String {
-        // Initialize the Places SDK
-        Places.initialize(applicationContext, apiKey)
-        val placesClient: PlacesClient = Places.createClient(this)
-
-        // Create a FetchPlaceRequest to retrieve the place details
-        val placeId = "placeId" // Replace with the actual place ID
-        val fields = listOf(ADDRESS)
-        val request = FetchPlaceRequest.newInstance(placeId, fields)
-
-        placesClient.fetchPlace(request)
-            .addOnSuccessListener { response ->
-                val place = response.place
-                val address = place.address
-                locationAutocomplete.setText(address)
+        val geocoder = Geocoder(this, Locale.getDefault())
+        var addressText = ""
+        try {
+            val addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
+            if (addresses != null) {
+                if (addresses.isNotEmpty()) {
+                    val address = addresses?.get(0)
+                    if (address != null) {
+                        addressText = address.getAddressLine(0)
+                    }
+                }
             }
-            .addOnFailureListener { exception ->
-                // Handle error
-            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return addressText
+    }
 
-        return ""
+    private fun updateLocationCoordinates(address: String) {
+        val geocoder = Geocoder(this, Locale.getDefault())
+        try {
+            val addresses = geocoder.getFromLocationName(address, 1)
+            if (addresses != null) {
+                if (addresses.isNotEmpty()) {
+                    val addressLocation = addresses?.get(0)
+                    if (addressLocation != null) {
+                        latitude = addressLocation.latitude
+                    }
+                    if (addressLocation != null) {
+                        longitude = addressLocation.longitude
+                    }
+                } else {
+                    latitude = 0.0
+                    longitude = 0.0
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            latitude = 0.0
+            longitude = 0.0
+        }
     }
 
     companion object {

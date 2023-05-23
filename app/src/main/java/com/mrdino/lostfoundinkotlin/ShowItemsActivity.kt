@@ -1,6 +1,5 @@
 package com.mrdino.lostfoundinkotlin
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -11,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 class ShowItemsActivity : AppCompatActivity() {
     private lateinit var listView: ListView
     private lateinit var adapter: ItemListAdapter
-    private lateinit var items: ArrayList<Item>
+    private lateinit var items: MutableList<Item>
     private lateinit var goBackButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,13 +36,11 @@ class ShowItemsActivity : AppCompatActivity() {
         }
 
         goBackButton.setOnClickListener {
-            //val intent = Intent(this, MainActivity::class.java)
-            //startActivity(intent)
             finish()
         }
     }
 
-    private fun getItemsFromDatabase(): ArrayList<Item> {
+    private fun getItemsFromDatabase(): MutableList<Item> {
         val dbHelper = DatabaseHelper(this)
         return dbHelper.getAllItems()
     }

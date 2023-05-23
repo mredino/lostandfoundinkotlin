@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 
-class ItemListAdapter(private val context: Context, private val items: ArrayList<Item>) : BaseAdapter() {
+class ItemListAdapter(private val context: Context, private val items: List<Item>) : BaseAdapter() {
 
     override fun getCount(): Int {
         return items.size

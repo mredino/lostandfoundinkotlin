@@ -2,6 +2,7 @@ package com.mrdino.lostfoundinkotlin
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
@@ -12,7 +13,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val DATABASE_VERSION = 1
 
         // Define the table name and column names
-        private const val TABLE_NAME = "items"
+        private const val TABLE_LOST_FOUND = "items"
         private const val COLUMN_ID = "_id"
         private const val COLUMN_TYPE = "type"
         private const val COLUMN_NAME = "name"
@@ -20,19 +21,30 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_DESCRIPTION = "description"
         private const val COLUMN_DATE = "date"
         private const val COLUMN_LOCATION = "location"
+        private const val COLUMN_LATITUDE = "latitude"
+        private const val COLUMN_LONGITUDE = "longitude"
     }
 
     override fun onCreate(db: SQLiteDatabase) {
-        // Create the database table
-        val createTableQuery = "CREATE TABLE $TABLE_NAME ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "$COLUMN_TYPE TEXT, $COLUMN_NAME TEXT, $COLUMN_CONTACT TEXT, " +
-                "$COLUMN_DESCRIPTION TEXT, $COLUMN_DATE TEXT, $COLUMN_LOCATION TEXT)"
+        val createTableQuery = """
+            CREATE TABLE $TABLE_LOST_FOUND (
+                $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $COLUMN_TYPE TEXT NOT NULL,
+                $COLUMN_NAME TEXT NOT NULL,
+                $COLUMN_CONTACT TEXT NOT NULL,
+                $COLUMN_DESCRIPTION TEXT NOT NULL,
+                $COLUMN_DATE TEXT NOT NULL,
+                $COLUMN_LOCATION TEXT NOT NULL,
+                $COLUMN_LATITUDE REAL,
+                $COLUMN_LONGITUDE REAL
+            )
+        """
         db.execSQL(createTableQuery)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // Handle database upgrades if needed
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
+        db.execSQL("DROP TABLE IF EXISTS $TABLE_LOST_FOUND")
         onCreate(db)
     }
 
@@ -46,37 +58,37 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             put(COLUMN_DESCRIPTION, item.description)
             put(COLUMN_DATE, item.date)
             put(COLUMN_LOCATION, item.location)
+            put(COLUMN_LATITUDE, item.latitude) // Insert latitude value
+            put(COLUMN_LONGITUDE, item.longitude) // Insert longitude value
         }
 
-        db.insert(TABLE_NAME, null, contentValues)
+        db.insert(TABLE_LOST_FOUND, null, contentValues)
         db.close()
     }
 
-    fun getAllItems(): ArrayList<Item> {
-        val itemList = ArrayList<Item>()
-        val db = readableDatabase
-
-        val query = "SELECT * FROM $TABLE_NAME"
-        val cursor = db.rawQuery(query, null)
-
-        if (cursor.moveToFirst()) {
-            do {
-                val id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ID))
-                val type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE))
-                val name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME))
-                val contact = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTACT))
-                val description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION))
-                val date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE))
-                val location = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LOCATION))
-
-                val item = Item(id, type, name, contact, description, date, location)
-                itemList.add(item)
-            } while (cursor.moveToNext())
+    fun getAllItems(): MutableList<Item> {
+        val itemList = mutableListOf<Item>()
+        val db = this.readableDatabase
+        val cursor: Cursor? = db.rawQuery("SELECT * FROM $TABLE_LOST_FOUND ORDER BY $COLUMN_ID DESC", null)
+        cursor?.let {
+            if (it.moveToFirst()) {
+                do {
+                    val id = it.getLong(it.getColumnIndexOrThrow(COLUMN_ID))
+                    val advertType = it.getString(it.getColumnIndexOrThrow(COLUMN_TYPE))
+                    val name = it.getString(it.getColumnIndexOrThrow(COLUMN_NAME))
+                    val contact = it.getString(it.getColumnIndexOrThrow(COLUMN_CONTACT))
+                    val description = it.getString(it.getColumnIndexOrThrow(COLUMN_DESCRIPTION))
+                    val date = it.getString(it.getColumnIndexOrThrow(COLUMN_DATE))
+                    val location = it.getString(it.getColumnIndexOrThrow(COLUMN_LOCATION))
+                    val latitude = it.getDouble(it.getColumnIndexOrThrow(COLUMN_LATITUDE))
+                    val longitude = it.getDouble(it.getColumnIndexOrThrow(COLUMN_LONGITUDE))
+                    val item = Item(id, advertType, name, contact, description, date, location, latitude, longitude)
+                    itemList.add(item)
+                } while (it.moveToNext())
+            }
         }
-
-        cursor.close()
+        cursor?.close()
         db.close()
-
         return itemList
     }
 
@@ -84,7 +96,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val db = writableDatabase
         val whereClause = "$COLUMN_ID = ?"
         val whereArgs = arrayOf(item.id.toString())
-        db.delete(TABLE_NAME, whereClause, whereArgs)
+        db.delete(TABLE_LOST_FOUND, whereClause, whereArgs)
         db.close()
     }
 }

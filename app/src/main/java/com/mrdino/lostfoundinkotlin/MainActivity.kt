@@ -13,6 +13,7 @@ class MainActivity : AppCompatActivity() {
 
         val createAdvertButton: Button = findViewById(R.id.createAdvertButton)
         val showAllItemsButton: Button = findViewById(R.id.showAllItemsButton)
+        val showMapButton: Button = findViewById(R.id.showMapButton)
 
         createAdvertButton.setOnClickListener {
             val intent = Intent(this, CreateAdvertActivity::class.java)
@@ -23,5 +24,22 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, ShowItemsActivity::class.java)
             startActivity(intent)
         }
+
+        showMapButton.setOnClickListener {
+            showMapButtonClicked()
+        }
+    }
+
+    private fun showMapButtonClicked() {
+        val itemsWithLocations = getItemsFromDatabase()
+
+        val intent = Intent(this, MapsActivity::class.java)
+        intent.putExtra("itemsWithLocations", ArrayList(itemsWithLocations))
+        startActivity(intent)
+    }
+
+    private fun getItemsFromDatabase(): List<Item> {
+        val dbHelper = DatabaseHelper(this)
+        return dbHelper.getAllItems()
     }
 }

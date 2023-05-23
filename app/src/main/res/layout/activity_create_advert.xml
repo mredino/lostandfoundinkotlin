@@ -49,19 +49,13 @@
         android:layout_height="wrap_content"
         android:hint="@string/date" />
 
-    <EditText
-        android:id="@+id/locationEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/location" />
-
     <AutoCompleteTextView
         android:id="@+id/locationAutocomplete"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:completionThreshold="1"
-        android:hint="@string/start_typing_location"
+        android:hint="@string/Location"
         android:inputType="text"
         android:maxLines="1" />
 

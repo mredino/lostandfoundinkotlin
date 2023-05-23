@@ -53,7 +53,6 @@ class CreateAdvertActivity : AppCompatActivity() {
         contactEditText = findViewById(R.id.contactEditText)
         descriptionEditText = findViewById(R.id.descriptionEditText)
         dateEditText = findViewById(R.id.dateEditText)
-        locationEditText = findViewById(R.id.locationEditText)
         saveButton = findViewById(R.id.saveButton)
         goBackButton = findViewById(R.id.goBackButton)
 
@@ -142,7 +141,7 @@ class CreateAdvertActivity : AppCompatActivity() {
         val contact = contactEditText.text.toString()
         val description = descriptionEditText.text.toString()
         val date = dateEditText.text.toString()
-        val location = locationEditText.text.toString()
+        val location = locationAutocomplete.text.toString()
 
         val item = Item(0, advertType, name, contact, description, date, location, latitude, longitude)
         val dbHelper = DatabaseHelper(this)

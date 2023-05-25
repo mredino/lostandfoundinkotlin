@@ -221,6 +221,6 @@ class CreateAdvertActivity : AppCompatActivity() {
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
-        private const val apiKey = "AIzaSyDLtTnpG9ZlsvKZG5ybfwjk2xZ_-6LukeQ" // Replace with your own API key
+        private const val apiKey = "Get your own Google Maps API key" // Replace with your own API key
     }
 }
